@@ -1,0 +1,97 @@
+using System;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Xml;
+using System.Xml.Schema;
+using Newtonsoft.Json;
+
+namespace ConsoleApp1
+{
+    public class Submission
+    {
+        // URLs read by the autograder (variable names unchanged)
+        public static string xmlURL = "https://YOURUSER.github.io/YOURREPO/NationalParks.xml";            // Q1.2
+        public static string xmlErrorURL = "https://YOURUSER.github.io/YOURREPO/NationalParksErrors.xml"; // Q1.3
+        public static string xsdURL = "https://YOURUSER.github.io/YOURREPO/NationalParks.xsd";            // Q1.1
+
+        public static void Main(string[] args)
+        {
+            // Q3: run all three operations
+            string result = Verification(xmlURL, xsdURL);
+            Console.WriteLine(result);
+
+            result = Verification(xmlErrorURL, xsdURL);
+            Console.WriteLine(result);
+
+            result = Xml2Json(xmlURL);
+            Console.WriteLine(result);
+        }
+
+        // Q2.1: validate an XML file against an XSD, both given by URL
+        public static string Verification(string xmlUrl, string xsdUrl)
+        {
+            // Make sure HTTPS works on older .NET versions
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+            StringBuilder errors = new StringBuilder();
+            try
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.ValidationType = ValidationType.Schema;
+                settings.Schemas.Add(null, xsdUrl);
+
+                // Collect every validation error or warning instead of stopping at the first
+                settings.ValidationEventHandler += (sender, e) =>
+                {
+                    errors.AppendLine(e.Severity + ": " + e.Message +
+                        " (Line " + e.Exception?.LineNumber + ", Position " + e.Exception?.LinePosition + ")");
+                };
+
+                using (XmlReader reader = XmlReader.Create(xmlUrl, settings))
+                {
+                    while (reader.Read()) { } // read the whole document to trigger validation
+                }
+            }
+            catch (XmlException ex)
+            {
+                // Not well-formed XML (e.g. missing closing tag): parser cannot continue
+                errors.AppendLine("XML error: " + ex.Message +
+                    " (Line " + ex.LineNumber + ", Position " + ex.LinePosition + ")");
+            }
+            catch (XmlSchemaException ex)
+            {
+                errors.AppendLine("Schema error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                errors.AppendLine("Error: " + ex.Message);
+            }
+
+            return errors.Length == 0 ? "No errors are found" : errors.ToString();
+        }
+
+        // Q2.2: convert a valid XML file to JSON
+        public static string Xml2Json(string xmlUrl)
+        {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+            XmlDocument doc = new XmlDocument();
+            doc.Load(xmlUrl);
+
+            // Force NationalPark and Phone to always serialize as JSON arrays,
+            // even when only one item exists, using Json.NET's json:Array hint
+            const string jsonNs = "http://james.newtonking.com/projects/json";
+            foreach (XmlNode node in doc.SelectNodes("//NationalPark | //Phone"))
+            {
+                XmlAttribute arr = doc.CreateAttribute("json", "Array", jsonNs);
+                arr.Value = "true";
+                node.Attributes.Append(arr);
+            }
+
+            // Attributes become "@Name" keys; a missing Rating attribute simply does not appear
+            string jsonText = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
+            return jsonText;
+        }
+    }
+}
