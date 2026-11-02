@@ -125,4 +125,40 @@
       <Zip>83012</Zip>
     </Address>
   </NationalPark>
+    <NationalPark Rating="4.7">
+    <Name>Bryce Canyon</Name>
+    <Phone>435-834-5322</Phone>
+    <Phone>435-834-4747</Phone>
+    <Address NearestAirport="Cedar City">
+      <Number>1</Number>
+      <Street>Highway 63</Street>
+      <City>Bryce</City>
+      <State>UT</State>
+      <Zip>84764</Zip>
+    </Address>
+  </NationalPark>
+  <NationalPark>
+    <Name>Joshua Tree</Name>
+    <Phone>760-367-5500</Phone>
+    <Address NearestAirport="Palm Springs">
+      <Number>74485</Number>
+      <Street>National Park Drive</Street>
+      <City>Twentynine Palms</City>
+      <State>CA</State>
+      <Zip>92277</Zip>
+    </Address>
+  </NationalPark>
+  <NationalPark Rating="4.5">
+    <Name>Saguaro</Name>
+    <Phone>520-733-5153</Phone>
+    <Phone>520-733-5158</Phone>
+    <Phone>520-733-5159</Phone>
+    <Address NearestAirport="Tucson">
+      <Number>3693</Number>
+      <Street>S Old Spanish Trail</Street>
+      <City>Tucson</City>
+      <State>AZ</State>
+      <Zip>85730</Zip>
+    </Address>
+  </NationalPark>
 </NationalParks>
